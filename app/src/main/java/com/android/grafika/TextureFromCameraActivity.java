@@ -78,7 +78,9 @@ import java.lang.ref.WeakReference;
  */
 public class TextureFromCameraActivity extends Activity implements SurfaceHolder.Callback,
         SeekBar.OnSeekBarChangeListener {
-    private static final String TAG = MainActivity.TAG;
+//    private static final String TAG = MainActivity.TAG;
+
+    private static final String TAG = "Thkim_" + TextureFromCameraActivity.class.getSimpleName();
 
     private static final int DEFAULT_ZOOM_PERCENT = 0;      // 0-100
     private static final int DEFAULT_SIZE_PERCENT = 50;     // 0-100
@@ -120,6 +122,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        DLog.s();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_texture_from_camera);
 
@@ -140,11 +143,13 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
         mRotateBar.setOnSeekBarChangeListener(this);
 
         updateControls();
+        DLog.e();
     }
 
     @Override
     protected void onResume() {
-        Log.d(TAG, "onResume BEGIN");
+//        Log.d(TAG, "onResume BEGIN");
+        DLog.s();
         super.onResume();
 
         if (!PermissionHelper.hasCameraPermission(this)) {
@@ -162,16 +167,20 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
         rh.sendRotateValue(mRotateBar.getProgress());
 
         if (sSurfaceHolder != null) {
-            Log.d(TAG, "Sending previous surface");
+//            Log.d(TAG, "Sending previous surface");
+            DLog.d("Sending previous surface");
             rh.sendSurfaceAvailable(sSurfaceHolder, false);
         } else {
-            Log.d(TAG, "No previous surface");
+//            Log.d(TAG, "No previous surface");
+            DLog.d("No previous surface");
         }
-        Log.d(TAG, "onResume END");
+//        Log.d(TAG, "onResume END");
+        DLog.e();
     }
 
     @Override
     protected void onPause() {
+        DLog.s();
         Log.d(TAG, "onPause BEGIN");
         super.onPause();
 
@@ -187,12 +196,14 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
             throw new RuntimeException("join was interrupted", ie);
         }
         mRenderThread = null;
-        Log.d(TAG, "onPause END");
+        Log.d(TAG,"onPause END");
+        DLog.e();
     }
 
     @Override   // SurfaceHolder.Callback
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.d(TAG, "surfaceCreated holder=" + holder + " (static=" + sSurfaceHolder + ")");
+        DLog.s();
+        DLog.d("surfaceCreated holder=" + holder + " (static=" + sSurfaceHolder + ")");
         if (sSurfaceHolder != null) {
             throw new RuntimeException("sSurfaceHolder is already set");
         }
@@ -212,37 +223,43 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
             // unpaused, but we track it anyway.  If the activity is un-paused and we start
             // the RenderThread, the SurfaceHolder will be passed in right after the thread
             // is created.
-            Log.d(TAG, "render thread not running");
+            DLog.d("render thread not running");
         }
+        DLog.s();
     }
 
     @Override   // SurfaceHolder.Callback
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Log.d(TAG, "surfaceChanged fmt=" + format + " size=" + width + "x" + height +
+        DLog.s();
+        DLog.d("surfaceChanged fmt=" + format + " size=" + width + "x" + height +
                 " holder=" + holder);
 
         if (mRenderThread != null) {
             RenderHandler rh = mRenderThread.getHandler();
             rh.sendSurfaceChanged(format, width, height);
         } else {
-            Log.d(TAG, "Ignoring surfaceChanged");
+            DLog.d("Ignoring surfaceChanged");
             return;
         }
+        DLog.e();
     }
 
     @Override   // SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder holder) {
-        // In theory we should tell the RenderThread that the surface has been destroyed.
+        DLog.s();
+// In theory we should tell the RenderThread that the surface has been destroyed.
         if (mRenderThread != null) {
             RenderHandler rh = mRenderThread.getHandler();
             rh.sendSurfaceDestroyed();
         }
         Log.d(TAG, "surfaceDestroyed holder=" + holder);
         sSurfaceHolder = null;
+        DLog.e();
     }
 
     @Override   // SeekBar.OnSeekBarChangeListener
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        DLog.s();
         if (mRenderThread == null) {
             // Could happen if we programmatically update the values after setting a listener
             // but before starting the thread.  Also, easy to cause this by scrubbing the seek
@@ -271,18 +288,28 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
         // OTOH, if we get the updates too quickly (60fps camera?), this could jam us
         // up and cause us to run behind.  So use with caution.
         rh.sendRedraw();
+        DLog.e();
     }
 
     @Override   // SeekBar.OnSeekBarChangeListener
-    public void onStartTrackingTouch(SeekBar seekBar) {}
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        DLog.s();
+        DLog.e();
+    }
+
     @Override   // SeekBar.OnSeekBarChangeListener
-    public void onStopTrackingTouch(SeekBar seekBar) {}
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        DLog.s();
+        DLog.e();
+    }
+
     @Override
 
     /**
      * Handles any touch events that aren't grabbed by one of the controls.
      */
     public boolean onTouchEvent(MotionEvent e) {
+        DLog.s();
         float x = e.getX();
         float y = e.getY();
 
@@ -303,6 +330,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
                 break;
         }
 
+        DLog.e();
         return true;
     }
 
@@ -310,6 +338,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
      * Updates the current state of the controls.
      */
     private void updateControls() {
+        DLog.s();
         String str = getString(R.string.tfcCameraParams, mCameraPreviewWidth,
                 mCameraPreviewHeight, mCameraPreviewFps);
         TextView tv = (TextView) findViewById(R.id.tfcCameraParams_text);
@@ -322,6 +351,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
         str = getString(R.string.tfcZoomArea, mZoomWidth, mZoomHeight);
         tv = (TextView) findViewById(R.id.tfcZoomArea_text);
         tv.setText(str);
+        DLog.e();
     }
 
     /**
@@ -340,7 +370,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
         private WeakReference<TextureFromCameraActivity> mWeakActivity;
 
         public MainHandler(TextureFromCameraActivity activity) {
+            DLog.s();
             mWeakActivity = new WeakReference<TextureFromCameraActivity>(activity);
+            DLog.e();
         }
 
         /**
@@ -349,10 +381,12 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from render thread.
          */
         public void sendCameraParams(int width, int height, float fps) {
+            DLog.s();
             // The right way to do this is to bundle them up into an object.  The lazy
             // way is to send two messages.
             sendMessage(obtainMessage(MSG_SEND_CAMERA_PARAMS0, width, height));
             sendMessage(obtainMessage(MSG_SEND_CAMERA_PARAMS1, (int) (fps * 1000), 0));
+            DLog.e();
         }
 
         /**
@@ -361,7 +395,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from render thread.
          */
         public void sendRectSize(int width, int height) {
+            DLog.s();
             sendMessage(obtainMessage(MSG_SEND_RECT_SIZE, width, height));
+            DLog.e();
         }
 
         /**
@@ -370,7 +406,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from render thread.
          */
         public void sendZoomArea(int width, int height) {
+            DLog.s();
             sendMessage(obtainMessage(MSG_SEND_ZOOM_AREA, width, height));
+            DLog.e();
         }
 
         /**
@@ -379,11 +417,14 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from render thread.
          */
         public void sendRotateDeg(int rot) {
+            DLog.s();
             sendMessage(obtainMessage(MSG_SEND_ROTATE_DEG, rot, 0));
+            DLog.e();
         }
 
         @Override
         public void handleMessage(Message msg) {
+//            DLog.s();
             TextureFromCameraActivity activity = mWeakActivity.get();
             if (activity == null) {
                 Log.d(TAG, "Got message for dead activity");
@@ -421,6 +462,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
                 default:
                     throw new RuntimeException("Unknown message " + msg.what);
             }
+//            DLog.e();
         }
     }
 
@@ -471,7 +513,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Activity.
          */
         public RenderThread(MainHandler handler) {
+            DLog.s();
             mMainHandler = handler;
+            DLog.e();
         }
 
         /**
@@ -479,6 +523,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          */
         @Override
         public void run() {
+            DLog.s();
             Looper.prepare();
 
             // We need to create the Handler before reporting ready.
@@ -502,6 +547,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
             synchronized (mStartLock) {
                 mReady = false;
             }
+            DLog.e();
         }
 
         /**
@@ -510,6 +556,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from the UI thread.
          */
         public void waitUntilReady() {
+            DLog.s();
             synchronized (mStartLock) {
                 while (!mReady) {
                     try {
@@ -517,20 +564,25 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
                     } catch (InterruptedException ie) { /* not expected */ }
                 }
             }
+            DLog.e();
         }
 
         /**
          * Shuts everything down.
          */
         private void shutdown() {
+            DLog.s();
             Log.d(TAG, "shutdown");
             Looper.myLooper().quit();
+            DLog.e();
         }
 
         /**
          * Returns the render thread's Handler.  This may be called from any thread.
          */
         public RenderHandler getHandler() {
+            DLog.s();
+            DLog.e();
             return mHandler;
         }
 
@@ -538,6 +590,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Handles the surface-created callback from SurfaceView.  Prepares GLES and the Surface.
          */
         private void surfaceAvailable(SurfaceHolder holder, boolean newSurface) {
+            DLog.s();
             Surface surface = holder.getSurface();
             mWindowSurface = new WindowSurface(mEglCore, surface, false);
             mWindowSurface.makeCurrent();
@@ -561,6 +614,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
             }
 
             mCameraTexture.setOnFrameAvailableListener(this);
+            DLog.e();
         }
 
         /**
@@ -570,6 +624,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Does not release EglCore.
          */
         private void releaseGl() {
+            DLog.s();
             GlUtil.checkGlError("releaseGl start");
 
             if (mWindowSurface != null) {
@@ -583,6 +638,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
             GlUtil.checkGlError("releaseGl done");
 
             mEglCore.makeNothingCurrent();
+            DLog.e();
         }
 
         /**
@@ -593,11 +649,13 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * be called.
          */
         private void surfaceChanged(int width, int height) {
+            DLog.s();
             Log.d(TAG, "RenderThread surfaceChanged " + width + "x" + height);
 
             mWindowSurfaceWidth = width;
             mWindowSurfaceHeight = height;
             finishSurfaceSetup();
+            DLog.e();
         }
 
         /**
@@ -606,8 +664,10 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
         private void surfaceDestroyed() {
             // In practice this never appears to be called -- the activity is always paused
             // before the surface is destroyed.  In theory it could be called though.
+            DLog.s();
             Log.d(TAG, "RenderThread surfaceDestroyed");
             releaseGl();
+            DLog.e();
         }
 
         /**
@@ -616,6 +676,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Open the camera (to set mCameraAspectRatio) before calling here.
          */
         private void finishSurfaceSetup() {
+            DLog.s();
             int width = mWindowSurfaceWidth;
             int height = mWindowSurfaceHeight;
             Log.d(TAG, "finishSurfaceSetup size=" + width + "x" + height +
@@ -641,6 +702,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
                 throw new RuntimeException(ioe);
             }
             mCamera.startPreview();
+            DLog.e();
         }
 
         /**
@@ -648,6 +710,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * values set by the UI.
          */
         private void updateGeometry() {
+            DLog.s();
             int width = mWindowSurfaceWidth;
             int height = mWindowSurfaceHeight;
 
@@ -670,25 +733,31 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
             mMainHandler.sendZoomArea(Math.round(mCameraPreviewWidth * zoomFactor),
                     Math.round(mCameraPreviewHeight * zoomFactor));
             mMainHandler.sendRotateDeg(rotAngle);
+            DLog.e();
         }
 
         @Override   // SurfaceTexture.OnFrameAvailableListener; runs on arbitrary thread
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+//            DLog.s();
             mHandler.sendFrameAvailable();
+//            DLog.e();
         }
 
         /**
          * Handles incoming frame of data from the camera.
          */
         private void frameAvailable() {
+//            DLog.s();
             mCameraTexture.updateTexImage();
             draw();
+//            DLog.e();
         }
 
         /**
          * Draws the scene and submits the buffer.
          */
         private void draw() {
+//            DLog.s();
             GlUtil.checkGlError("draw start");
 
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -697,27 +766,36 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
             mWindowSurface.swapBuffers();
 
             GlUtil.checkGlError("draw done");
+//            DLog.e();
         }
 
         private void setZoom(int percent) {
+            DLog.s();
             mZoomPercent = percent;
             updateGeometry();
+            DLog.e();
         }
 
         private void setSize(int percent) {
+            DLog.s();
             mSizePercent = percent;
             updateGeometry();
+            DLog.e();
         }
 
         private void setRotate(int percent) {
+            DLog.s();
             mRotatePercent = percent;
             updateGeometry();
+            DLog.e();
         }
 
         private void setPosition(int x, int y) {
+            DLog.s();
             mPosX = x;
             mPosY = mWindowSurfaceHeight - y;   // GLES is upside-down
             updateGeometry();
+            DLog.e();
         }
 
         /**
@@ -727,6 +805,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Sets mCameraPreviewWidth / mCameraPreviewHeight.
          */
         private void openCamera(int desiredWidth, int desiredHeight, int desiredFps) {
+            DLog.s();
             if (mCamera != null) {
                 throw new RuntimeException("camera already initialized");
             }
@@ -779,18 +858,21 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
             mCameraPreviewHeight = mCameraPreviewSize.height;
             mMainHandler.sendCameraParams(mCameraPreviewWidth, mCameraPreviewHeight,
                     thousandFps / 1000.0f);
+            DLog.e();
         }
 
         /**
          * Stops camera preview, and releases the camera to the system.
          */
         private void releaseCamera() {
+            DLog.s();
             if (mCamera != null) {
                 mCamera.stopPreview();
                 mCamera.release();
                 mCamera = null;
                 Log.d(TAG, "releaseCamera -- done");
             }
+            DLog.e();
         }
     }
 
@@ -821,7 +903,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from render thread.
          */
         public RenderHandler(RenderThread rt) {
+            DLog.s();
             mWeakRenderThread = new WeakReference<RenderThread>(rt);
+            DLog.e();
         }
 
         /**
@@ -836,8 +920,10 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from UI thread.
          */
         public void sendSurfaceAvailable(SurfaceHolder holder, boolean newSurface) {
+            DLog.s();
             sendMessage(obtainMessage(MSG_SURFACE_AVAILABLE,
                     newSurface ? 1 : 0, 0, holder));
+            DLog.e();
         }
 
         /**
@@ -846,9 +932,11 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from UI thread.
          */
         public void sendSurfaceChanged(@SuppressWarnings("unused") int format, int width,
-                int height) {
+                                       int height) {
+            DLog.s();
             // ignore format
             sendMessage(obtainMessage(MSG_SURFACE_CHANGED, width, height));
+            DLog.e();
         }
 
         /**
@@ -857,7 +945,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from UI thread.
          */
         public void sendSurfaceDestroyed() {
+            DLog.s();
             sendMessage(obtainMessage(MSG_SURFACE_DESTROYED));
+            DLog.e();
         }
 
         /**
@@ -866,7 +956,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from UI thread.
          */
         public void sendShutdown() {
+            DLog.s();
             sendMessage(obtainMessage(MSG_SHUTDOWN));
+            DLog.e();
         }
 
         /**
@@ -875,7 +967,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from UI thread.
          */
         public void sendFrameAvailable() {
+//            DLog.s();
             sendMessage(obtainMessage(MSG_FRAME_AVAILABLE));
+//            DLog.e();
         }
 
         /**
@@ -884,7 +978,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from UI thread.
          */
         public void sendZoomValue(int progress) {
+            DLog.s();
             sendMessage(obtainMessage(MSG_ZOOM_VALUE, progress, 0));
+            DLog.e();
         }
 
         /**
@@ -893,7 +989,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from UI thread.
          */
         public void sendSizeValue(int progress) {
+            DLog.s();
             sendMessage(obtainMessage(MSG_SIZE_VALUE, progress, 0));
+            DLog.e();
         }
 
         /**
@@ -902,7 +1000,10 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from UI thread.
          */
         public void sendRotateValue(int progress) {
+            DLog.s();
+            DLog.d("progress : " + progress);
             sendMessage(obtainMessage(MSG_ROTATE_VALUE, progress, 0));
+            DLog.e();
         }
 
         /**
@@ -911,7 +1012,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from UI thread.
          */
         public void sendPosition(int x, int y) {
+            DLog.s();
             sendMessage(obtainMessage(MSG_POSITION, x, y));
+            DLog.e();
         }
 
         /**
@@ -920,11 +1023,14 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
          * Call from UI thread.
          */
         public void sendRedraw() {
+            DLog.s();
             sendMessage(obtainMessage(MSG_REDRAW));
+            DLog.e();
         }
 
         @Override  // runs on RenderThread
         public void handleMessage(Message msg) {
+//            DLog.s();
             int what = msg.what;
             //Log.d(TAG, "RenderHandler [" + this + "]: what=" + what);
 
@@ -965,9 +1071,10 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
                 case MSG_REDRAW:
                     renderThread.draw();
                     break;
-               default:
+                default:
                     throw new RuntimeException("unknown message " + what);
             }
+//            DLog.e();
         }
     }
 }
